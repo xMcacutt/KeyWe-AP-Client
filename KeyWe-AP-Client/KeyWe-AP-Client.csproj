@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>KeyWe_AP_Client</AssemblyName>
+        <Product>KeyWe Archipelago Client</Product>
+        <Version>0.1.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>KeyWe_AP_Client</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>D:\SteamLibrary\steamapps\common\KeyWe\KeyWe_Data\Managed\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Photon3Unity3D">
+            <HintPath>D:\SteamLibrary\steamapps\common\KeyWe\KeyWe_Data\Managed\Photon3Unity3D.dll</HintPath>
+        </Reference>
+        <Reference Include="PhotonRealtime">
+            <HintPath>D:\SteamLibrary\steamapps\common\KeyWe\KeyWe_Data\Managed\PhotonRealtime.dll</HintPath>
+        </Reference>
+        <Reference Include="PhotonUnityNetworking">
+            <HintPath>D:\SteamLibrary\steamapps\common\KeyWe\KeyWe_Data\Managed\PhotonUnityNetworking.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>D:\SteamLibrary\steamapps\common\KeyWe\KeyWe_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>D:\SteamLibrary\steamapps\common\KeyWe\KeyWe_Data\Managed\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>D:\SteamLibrary\steamapps\common\KeyWe\KeyWe_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.0"/>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.Core" Version="5.*"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
+        <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="UnityEngine.Modules" Version="2021.3.38.8007589" IncludeAssets="compile"/>
+        <Publicize Include="Assembly-CSharp"/>
+        <DoNotPublicize Include="Assembly-CSharp:ProfileSelect.OnProfileSelected"/>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\KeyWe\BepInEx\plugins\KeyWe_AP_Client\$(TargetFileName)&quot;"/>
+    </Target>
+
+</Project>
