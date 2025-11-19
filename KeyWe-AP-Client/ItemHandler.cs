@@ -55,104 +55,122 @@ public class ItemHandler
 {
     public void HandleItem(int index, ItemInfo item)
     {
-        if (index < SaveDataHandler.ArchipelagoSaveData.ItemIndex)
-            return;
-        Debug.Log($"Item Received: {item.ItemName}");
-        SaveDataHandler.ArchipelagoSaveData.ItemIndex++;
-        switch (item.ItemId)
+        try
         {
-            case > 0x0 and < 0xA:
-                PluginMain.SaveDataHandler.UnlockWeek((int)item.ItemId - 1);
-                break;
-            case (int)KWItem.OvertimeSummer:
-                SaveDataHandler.ArchipelagoSaveData.OvertimeSummerUnlocked = true;
-                break;
-            case (int)KWItem.OvertimeFall:
-                SaveDataHandler.ArchipelagoSaveData.OvertimeFallUnlocked = true;
-                break;
-            case (int)KWItem.OvertimeWinter:
-                SaveDataHandler.ArchipelagoSaveData.OvertimeWinterUnlocked = true;
-                break;
-            case (int)KWItem.Tournament:
-                if (SystemHandler.Get<DataKeeper>().Profile.CheckProgress(Enums.ProgressFlag.TournamentDLC))
-                    SaveDataHandler.ArchipelagoSaveData.TournamentUnlocked = true;
-                else 
-                     APConsole.Instance.Log("Warning: You do not own the Telepost Tournament DLC but have its checks enabled.");
-                break;
-            case (int)KWItem.Facewear:
-                PluginMain.GameHandler.EquipRandom(Customizables.Categories.Face);
-                break;
-            case (int)KWItem.Hat:
-                PluginMain.GameHandler.EquipRandom(Customizables.Categories.Hat);
-                break;
-            case (int)KWItem.Skin:
-                PluginMain.GameHandler.EquipRandom(Customizables.Categories.Skin);
-                break;
-            case (int)KWItem.Backwear:
-                PluginMain.GameHandler.EquipRandom(Customizables.Categories.Back);
-                break;
-            case (int)KWItem.Hairstyle:
-                PluginMain.GameHandler.EquipRandom(Customizables.Categories.Hair);
-                break;
-            case (int)KWItem.Footwear:
-                PluginMain.GameHandler.EquipRandom(Customizables.Categories.Footwear);
-                break;
-            case (int)KWItem.Arms:
-                PluginMain.GameHandler.EquipRandom(Customizables.Categories.Arms);
-                break;
-            case (int)KWItem.DashUp:
-                var currentDashCooldown = SaveDataHandler.ArchipelagoSaveData.DashCooldown;
-                var dashIncrement = (Data.InitialDashCooldown - Data.MinDashCooldown) / 5;
-                SaveDataHandler.ArchipelagoSaveData.DashCooldown = Math.Max(currentDashCooldown - dashIncrement, Data.MinDashCooldown);
-                var currentDashForce = SaveDataHandler.ArchipelagoSaveData.DashForce;
-                dashIncrement = (Data.MaxDashForce - Data.InitialDashForce) / 5;
-                SaveDataHandler.ArchipelagoSaveData.DashForce = Math.Min(currentDashForce + dashIncrement, Data.MaxDashForce);
-                GameHandler.onReceivedMovementUpgrade.Invoke();
-                break;
-            case (int)KWItem.MoveUp:
-                var currentWalkSpeed = SaveDataHandler.ArchipelagoSaveData.WalkSpeed;
-                var walkIncrement = (Data.MaxWalkSpeed - Data.InitialWalkSpeed) / 5;
-                SaveDataHandler.ArchipelagoSaveData.WalkSpeed = Math.Min(currentWalkSpeed + walkIncrement, Data.MaxWalkSpeed);
-                GameHandler.onReceivedMovementUpgrade.Invoke();
-                break;
-            case (int)KWItem.SwimUp:
-                var currentSwimSpeed = SaveDataHandler.ArchipelagoSaveData.SwimSpeed;
-                var swimIncrement = (Data.MaxSwimSpeed - Data.InitialSwimSpeed) / 5;
-                SaveDataHandler.ArchipelagoSaveData.SwimSpeed = Math.Min(currentSwimSpeed + swimIncrement, Data.MaxSwimSpeed);
-                GameHandler.onReceivedMovementUpgrade.Invoke();
-                break;
-            case (int)KWItem.JumpUp:
-                var currentJumpHeight = SaveDataHandler.ArchipelagoSaveData.JumpHeight;
-                var jumpIncrement = (Data.MaxJumpHeight - Data.InitialJumpHeight) / 5;
-                SaveDataHandler.ArchipelagoSaveData.JumpHeight = Math.Min(currentJumpHeight + jumpIncrement, Data.MaxJumpHeight);
-                GameHandler.onReceivedMovementUpgrade.Invoke();
-                break;
-            case (int)KWItem.RespawnUp:
-                var currentRespawnFallSpeed = SaveDataHandler.ArchipelagoSaveData.RespawnFallSpeed;
-                var respawnFallSpeedIncrement = (Data.MaxRespawnFallSpeed - Data.InitialRespawnFallSpeed) / 5;
-                SaveDataHandler.ArchipelagoSaveData.RespawnFallSpeed = Math.Min(currentRespawnFallSpeed + respawnFallSpeedIncrement, Data.MaxRespawnFallSpeed);
-                var currentRespawnFallMoveSpeed = SaveDataHandler.ArchipelagoSaveData.RespawnFallMoveSpeed;
-                var respawnFallMoveSpeedIncrement = (Data.MaxRespawnFallMoveSpeed - Data.InitialRespawnFallMoveSpeed) / 5;
-                SaveDataHandler.ArchipelagoSaveData.RespawnFallMoveSpeed = Math.Min(currentRespawnFallMoveSpeed + respawnFallMoveSpeedIncrement, Data.MaxRespawnFallMoveSpeed);
-                GameHandler.onReceivedMovementUpgrade.Invoke();
-                break;
-            case (int)KWItem.ChirpUp:
-                var currentChirpCooldown = SaveDataHandler.ArchipelagoSaveData.ChirpCooldown;
-                var chirpIncrement = (Data.InitialChirpCooldown - Data.MinChirpCooldown) / 5;
-                SaveDataHandler.ArchipelagoSaveData.ChirpCooldown = Math.Max(currentChirpCooldown - chirpIncrement, Data.MinChirpCooldown);
-                GameHandler.onReceivedMovementUpgrade.Invoke();
-                break;
-            case (int)KWItem.PeckUp:
-                var currentPeckCooldown = SaveDataHandler.ArchipelagoSaveData.PeckCooldown;
-                var peckIncrement = (Data.InitialPeckCooldown - Data.MinPeckCooldown) / 5;
-                SaveDataHandler.ArchipelagoSaveData.PeckCooldown = Math.Max(currentPeckCooldown - peckIncrement, Data.MinPeckCooldown);
-                GameHandler.onReceivedMovementUpgrade.Invoke();
-                break;
-            case > 0x2FF and < 0x30F:
-                SaveDataHandler.ArchipelagoSaveData.Collectibles[(int)item.ItemId - 0x300] = true;
-                break;
+            if (index < SaveDataHandler.ArchipelagoSaveData.ItemIndex)
+                return;
+            SaveDataHandler.ArchipelagoSaveData.ItemIndex++;
+            switch (item.ItemId)
+            {
+                case > 0x0 and < 0xA:
+                    PluginMain.SaveDataHandler.UnlockWeek((int)item.ItemId - 1);
+                    break;
+                case (int)KWItem.OvertimeSummer:
+                    SaveDataHandler.ArchipelagoSaveData.OvertimeSummerUnlocked = true;
+                    break;
+                case (int)KWItem.OvertimeFall:
+                    SaveDataHandler.ArchipelagoSaveData.OvertimeFallUnlocked = true;
+                    break;
+                case (int)KWItem.OvertimeWinter:
+                    SaveDataHandler.ArchipelagoSaveData.OvertimeWinterUnlocked = true;
+                    break;
+                case (int)KWItem.Tournament:
+                    if (SystemHandler.Get<DataKeeper>().Profile.CheckProgress(Enums.ProgressFlag.TournamentDLC))
+                        SaveDataHandler.ArchipelagoSaveData.TournamentUnlocked = true;
+                    else
+                        APConsole.Instance.Log(
+                            "Warning: You do not own the Telepost Tournament DLC but have its checks enabled.");
+                    break;
+                case (int)KWItem.Facewear:
+                    PluginMain.GameHandler.EquipRandom(Customizables.Categories.Face);
+                    break;
+                case (int)KWItem.Hat:
+                    PluginMain.GameHandler.EquipRandom(Customizables.Categories.Hat);
+                    break;
+                case (int)KWItem.Skin:
+                    PluginMain.GameHandler.EquipRandom(Customizables.Categories.Skin);
+                    break;
+                case (int)KWItem.Backwear:
+                    PluginMain.GameHandler.EquipRandom(Customizables.Categories.Back);
+                    break;
+                case (int)KWItem.Hairstyle:
+                    PluginMain.GameHandler.EquipRandom(Customizables.Categories.Hair);
+                    break;
+                case (int)KWItem.Footwear:
+                    PluginMain.GameHandler.EquipRandom(Customizables.Categories.Footwear);
+                    break;
+                case (int)KWItem.Arms:
+                    PluginMain.GameHandler.EquipRandom(Customizables.Categories.Arms);
+                    break;
+                case (int)KWItem.DashUp:
+                    var currentDashCooldown = SaveDataHandler.ArchipelagoSaveData.DashCooldown;
+                    var dashIncrement = (Data.InitialDashCooldown - Data.MinDashCooldown) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.DashCooldown =
+                        Math.Max(currentDashCooldown - dashIncrement, Data.MinDashCooldown);
+                    var currentDashForce = SaveDataHandler.ArchipelagoSaveData.DashForce;
+                    dashIncrement = (Data.MaxDashForce - Data.InitialDashForce) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.DashForce =
+                        Math.Min(currentDashForce + dashIncrement, Data.MaxDashForce);
+                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    break;
+                case (int)KWItem.MoveUp:
+                    var currentWalkSpeed = SaveDataHandler.ArchipelagoSaveData.WalkSpeed;
+                    var walkIncrement = (Data.MaxWalkSpeed - Data.InitialWalkSpeed) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.WalkSpeed =
+                        Math.Min(currentWalkSpeed + walkIncrement, Data.MaxWalkSpeed);
+                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    break;
+                case (int)KWItem.SwimUp:
+                    var currentSwimSpeed = SaveDataHandler.ArchipelagoSaveData.SwimSpeed;
+                    var swimIncrement = (Data.MaxSwimSpeed - Data.InitialSwimSpeed) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.SwimSpeed =
+                        Math.Min(currentSwimSpeed + swimIncrement, Data.MaxSwimSpeed);
+                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    break;
+                case (int)KWItem.JumpUp:
+                    var currentJumpHeight = SaveDataHandler.ArchipelagoSaveData.JumpHeight;
+                    var jumpIncrement = (Data.MaxJumpHeight - Data.InitialJumpHeight) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.JumpHeight =
+                        Math.Min(currentJumpHeight + jumpIncrement, Data.MaxJumpHeight);
+                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    break;
+                case (int)KWItem.RespawnUp:
+                    var currentRespawnFallSpeed = SaveDataHandler.ArchipelagoSaveData.RespawnFallSpeed;
+                    var respawnFallSpeedIncrement = (Data.MaxRespawnFallSpeed - Data.InitialRespawnFallSpeed) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.RespawnFallSpeed =
+                        Math.Min(currentRespawnFallSpeed + respawnFallSpeedIncrement, Data.MaxRespawnFallSpeed);
+                    var currentRespawnFallMoveSpeed = SaveDataHandler.ArchipelagoSaveData.RespawnFallMoveSpeed;
+                    var respawnFallMoveSpeedIncrement =
+                        (Data.MaxRespawnFallMoveSpeed - Data.InitialRespawnFallMoveSpeed) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.RespawnFallMoveSpeed = Math.Min(
+                        currentRespawnFallMoveSpeed + respawnFallMoveSpeedIncrement, Data.MaxRespawnFallMoveSpeed);
+                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    break;
+                case (int)KWItem.ChirpUp:
+                    var currentChirpCooldown = SaveDataHandler.ArchipelagoSaveData.ChirpCooldown;
+                    var chirpIncrement = (Data.InitialChirpCooldown - Data.MinChirpCooldown) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.ChirpCooldown = Math.Max(currentChirpCooldown - chirpIncrement,
+                        Data.MinChirpCooldown);
+                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    break;
+                case (int)KWItem.PeckUp:
+                    var currentPeckCooldown = SaveDataHandler.ArchipelagoSaveData.PeckCooldown;
+                    var peckIncrement = (Data.InitialPeckCooldown - Data.MinPeckCooldown) / 5;
+                    SaveDataHandler.ArchipelagoSaveData.PeckCooldown =
+                        Math.Max(currentPeckCooldown - peckIncrement, Data.MinPeckCooldown);
+                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    break;
+                case > 0x2FF and < 0x30F:
+                    SaveDataHandler.ArchipelagoSaveData.Collectibles[(int)item.ItemId - 0x300] = true;
+                    break;
+            }
+
+            SystemHandler.Get<DataKeeper>().SaveProfile();
         }
-        
-        SystemHandler.Get<DataKeeper>().SaveProfile();
+        catch (Exception ex)
+        {
+            APConsole.Instance.Log($"[HandleItem ERROR] {ex}");
+            throw;
+        }
     }
 }

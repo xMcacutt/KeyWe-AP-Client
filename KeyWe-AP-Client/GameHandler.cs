@@ -69,10 +69,10 @@ public class GameHandler : MonoBehaviour
         var dataKeeper = SystemHandler.Get<DataKeeper>();
         switch (dataKeeper.CurrentState)
         {
-            case DataKeeper.State.InMatch when Data.ExcludedLevels[category].Contains(Data.LevelNameToId[dataKeeper.CurrentLevelData.Name]):
-            case DataKeeper.State.InOvertimeShift when Data.ExcludedOvertimeShifts[category].Contains(Data.OvertimeLevelNameToId[dataKeeper.CurrentLevelData.Name]):
-            case DataKeeper.State.InTournament when Data.ExcludedTournamentCourses[category].Contains(Data.TournamentLevelNameToId[dataKeeper.CurrentLevelData.Name]):
-                APConsole.Instance.Log($"Cannot equip cosmetic in this level");
+            case DataKeeper.State.InMatch when Data.ExcludedLevels.Contains(Data.LevelNameToId[dataKeeper.CurrentLevelData.Name]):
+            case DataKeeper.State.InOvertimeShift when Data.ExcludedOvertimeShifts.Contains(Data.OvertimeLevelNameToId[dataKeeper.CurrentLevelData.Name]):
+            case DataKeeper.State.InTournament when Data.ExcludedTournamentCourses.Contains(Data.TournamentLevelNameToId[dataKeeper.CurrentLevelData.Name]):
+                APConsole.Instance.Log($"Cannot equip cosmetics in this level");
                 return;
             default:
                 StartCoroutine(EquipRandomDelayed(category));
@@ -86,19 +86,15 @@ public class GameHandler : MonoBehaviour
 
         var dataKeeper = SystemHandler.Get<DataKeeper>();
         var kiwis = FindObjectsOfType<Kiwi>();
-
         if (kiwis.Length == 0)
             yield break;
-
         foreach (var kiwi in kiwis)
         {
             if (!kiwi.IsLocalPlayer)
                 continue;
-
             var customizationIndex = !PhotonNetwork.IsConnected
                 ? kiwi.playerIndex
                 : dataKeeper.OnlineSelectedKiwi;
-
             var customization = dataKeeper.Profile.GetCustomization(customizationIndex);
             var wearables = dataKeeper.GetWearables(category).Items;
             var filtered = wearables.Where(x =>
@@ -108,10 +104,8 @@ public class GameHandler : MonoBehaviour
                      x.RewardCategory != Customizables.RewardCategory.Preorder) &&
                     x.RewardCategory != Customizables.RewardCategory.SwitchPlatform)
                 .ToList();
-
             if (filtered.Count == 0)
                 continue;
-
             var wearable = filtered.GetRandom();
 
             var mask = 1;
@@ -122,11 +116,9 @@ public class GameHandler : MonoBehaviour
                     customization.EquipItem((Customizables.Categories)i, 0);
                 mask <<= 1;
             }
-
             UnequipIncompatibleItems(wearable, customizationIndex, category);
             customization.EquipItem(category, wearable.Id);
             dataKeeper.SaveProfile();
-
             kiwi.Customization.InitAll();
             if (PhotonNetwork.IsConnected)
             {
@@ -225,17 +217,24 @@ public class GameHandler : MonoBehaviour
         [HarmonyPrefix]
         public static void OnRespawn(Kiwi __instance, bool inWater)
         {
-            if (SomeoneElseDied)
+            try
             {
-                SomeoneElseDied = false;
-                return; 
+                if (SomeoneElseDied)
+                {
+                    SomeoneElseDied = false;
+                    return;
+                }
+
+                if (__instance.IsPaused)
+                    return;
+
+                if (PluginMain.ArchipelagoHandler.SlotData.DeathLink)
+                    PluginMain.ArchipelagoHandler.SendDeath();
             }
-
-            if (__instance.IsPaused)
-                return;
-
-            if (PluginMain.ArchipelagoHandler.SlotData.DeathLink)
-                PluginMain.ArchipelagoHandler.SendDeath();
+            catch (Exception ex)
+            {
+                APConsole.Instance.Log(ex.Message);
+            }
         }
     }
 

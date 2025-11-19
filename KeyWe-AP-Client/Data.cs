@@ -45,39 +45,9 @@ public class Data
         { "Lake Bessy", 2 }
     };
 
-    public static Dictionary<Customizables.Categories, int[]> ExcludedLevels = new()
-    {
-        { Customizables.Categories.Arms, [] },
-        { Customizables.Categories.Face, [] },
-        { Customizables.Categories.Back, [16, 18, 19,] },
-        { Customizables.Categories.Hair, [] },
-        { Customizables.Categories.Hat, [] },
-        { Customizables.Categories.Footwear, [] },
-        { Customizables.Categories.Skin, [17] }
-    };
-    
-    public static Dictionary<Customizables.Categories, int[]> ExcludedOvertimeShifts = new()
-    {
-        { Customizables.Categories.Arms, [] },
-        { Customizables.Categories.Face, [] },
-        { Customizables.Categories.Back, [3] },
-        { Customizables.Categories.Hair, [] },
-        { Customizables.Categories.Hat, [] },
-        { Customizables.Categories.Footwear, [] },
-        { Customizables.Categories.Skin, [17] }
-    };
-    
-        
-    public static Dictionary<Customizables.Categories, int[]> ExcludedTournamentCourses = new()
-    {
-        { Customizables.Categories.Arms, [] },
-        { Customizables.Categories.Face, [] },
-        { Customizables.Categories.Back, [2] },
-        { Customizables.Categories.Hair, [] },
-        { Customizables.Categories.Hat, [1] },
-        { Customizables.Categories.Footwear, [] },
-        { Customizables.Categories.Skin, [] }
-    };
+    public static List<int> ExcludedLevels = [16, 18, 19, 17];
+    public static List<int> ExcludedOvertimeShifts = [3];
+    public static List<int> ExcludedTournamentCourses = [1, 2];
 
     public static Dictionary<string, int> LevelNameToId = new()
     {
@@ -108,7 +78,7 @@ public class Data
         { "Trapdoors and Tentacles", 24 },
         { "Assembly-Line Scramble", 25 },
         { "Dueling Crates", 26 },
-        { "Switchboard Syncrhony", 27 },
+        { "Switchboard Synchrony", 27 },
         { "Bungalow Basin Bake-Off", 28 },
         { "Parts and Crafts", 29 },
         { "The Hollyjostle Tinkertrack", 30 },

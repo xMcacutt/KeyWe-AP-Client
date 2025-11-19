@@ -11,7 +11,7 @@ namespace KeyWe_AP_Client;
 
 public class CustomSaveData
 {
-    public int ItemIndex;
+    public int ItemIndex = 1;
 
     public Dictionary<int, bool> WeeksUnlocked { get; set; } = new()
     {

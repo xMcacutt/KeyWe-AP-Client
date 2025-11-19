@@ -29,19 +29,15 @@ public class PluginMain : BaseUnityPlugin
         handlerObj = new GameObject("ArchipelagoGameHandler");
         GameHandler = handlerObj.AddComponent<GameHandler>();
         DontDestroyOnLoad(handlerObj);
+        ItemHandler = new ItemHandler();
+        LocationHandler = new LocationHandler();
         APConsole.Create();
         APConsole.Instance.Log("Press F7 to toggle the archipelago log.");
     }
 
     private void Start()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
         Cursor.visible = true;
         ControllerVibrationHandler.Instance.enabled = false;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        Debug.Log($"Scene loaded: {scene.name}");
     }
 }

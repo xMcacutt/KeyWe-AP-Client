@@ -93,7 +93,7 @@ public class ArchipelagoHandler(string server, int port, string slot, string pas
 
     private void OnSocketClosed(string reason)
     {
-        Debug.Log($"Connection closed ({reason}) Attempting reconnect...");
+        APConsole.Instance.Log($"Connection closed ({reason}) Attempting reconnect...");
         IsConnected = false;
     }
 
@@ -124,8 +124,6 @@ public class ArchipelagoHandler(string server, int port, string slot, string pas
         {
             _loginSuccessful = (LoginSuccessful)result;
             SlotData = new SlotData(_loginSuccessful.SlotData);
-            PluginMain.ItemHandler = new ItemHandler();
-            PluginMain.LocationHandler = new LocationHandler();
             PluginMain.GameHandler.InitOnConnect();
             new Thread(RunCheckLocationsFromList).Start();
             OnConnect.Invoke();
@@ -136,18 +134,26 @@ public class ArchipelagoHandler(string server, int port, string slot, string pas
         var errorMessage = $"Failed to Connect to {Server}:{Port} as {Slot}:";
         errorMessage = failure.Errors.Aggregate(errorMessage, (current, error) => current + $"\n    {error}");
         errorMessage = failure.ErrorCodes.Aggregate(errorMessage, (current, error) => current + $"\n    {error}");
-        Debug.Log(errorMessage);
-        Debug.Log("Attempting reconnect...");
+        APConsole.Instance.Log(errorMessage);
+        APConsole.Instance.Log("Attempting reconnect...");
         return false;
     }
 
     private void ItemReceived(ReceivedItemsHelper helper)
     {
-        while (helper.Any())
+        try
         {
-            var itemIndex = helper.Index;
-            var item = helper.DequeueItem();
-            PluginMain.ItemHandler.HandleItem(itemIndex, item);
+            while (helper.Any())
+            {
+                var itemIndex = helper.Index;
+                var item = helper.DequeueItem();
+                PluginMain.ItemHandler.HandleItem(itemIndex, item);
+            }
+        }
+        catch (Exception ex)
+        {
+            APConsole.Instance.Log($"[ItemReceived ERROR] {ex}");
+            throw;
         }
     }
 
@@ -263,7 +269,7 @@ public class ArchipelagoHandler(string server, int port, string slot, string pas
         if (packet.Data.TryGetValue("cause", out var causeObj))
         {
             var cause = causeObj?.ToString() ?? "Unknown";
-            Console.WriteLine($"Received Bounce Packet with Tag: {tag} :: {cause}");
+            //Console.WriteLine($"Received Bounce Packet with Tag: {tag} :: {cause}");
         }
 
         handler(source, packet.Data);
@@ -320,7 +326,7 @@ public class ArchipelagoHandler(string server, int port, string slot, string pas
         if (levelGoalsReq > 0)
             requirementsString.AppendLine($"{levelGoalsDone}/{levelGoalsReq} levels complete");
         if (PluginMain.ArchipelagoHandler.SlotData.RequiredLevelCompletionsPerWeek > 0)
-            requirementsString.AppendLine($"{weekGoalsDone}/{12} weeks with {PluginMain.ArchipelagoHandler.SlotData.RequiredLevelCompletionsPerWeek} level(s) complete");
+            requirementsString.AppendLine($"{weekGoalsDone}/{9} weeks with {PluginMain.ArchipelagoHandler.SlotData.RequiredLevelCompletionsPerWeek} level(s) complete");
         if (colsReq > 0)
             requirementsString.AppendLine($"{colsCollected}/{colsReq} collectibles received");
         if (colChecksReq > 0)

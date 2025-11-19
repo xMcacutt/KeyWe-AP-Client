@@ -26,6 +26,8 @@ public class SlotData
         RequiredLevelCompletionsPerWeek = (int)(long)slotDict["RequiredLevelCompletionsPerWeek"];
         RequiredCollectibles = (int)(long)slotDict["RequiredCollectibles"];
         RequiredCollectibleChecks = (int)(long)slotDict["RequiredCollectibleChecks"];
+        RequiredOvertimeCompletions = (int)(long)slotDict["RequiredOvertimeCompletions"];
+        RequiredTournamentCompletions = (int)(long)slotDict["RequiredTournamentCompletions"];
         var startingWeek = (int)(long)slotDict["StartingWeek"];
         var grade = (int)(long)slotDict["LevelCompletionCheckThreshold"];
         GradeCheckThreshold = grade switch

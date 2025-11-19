@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -76,6 +77,7 @@ public class APConsole : MonoBehaviour
     {
         if (Instance != null)
             return;
+        File.WriteAllText(SaveSystem.DataRoot + "ArchieplagoDebugLog.txt", "");
         var consoleObject = new GameObject("ArchipelagoConsoleUI");
         DontDestroyOnLoad(consoleObject);
         Instance = consoleObject.AddComponent<APConsole>();
@@ -291,9 +293,13 @@ public class APConsole : MonoBehaviour
         });
     }
 
+    private const bool LogToFile = true;
+
     public void Log(string text)
     {
         var entry = new LogEntry(text);
+        if (LogToFile)
+            File.AppendAllLines(SaveSystem.DataRoot + "ArchipelagoDebugLog.txt", [text]);
         _cachedEntries.Enqueue(entry);
     }
 
