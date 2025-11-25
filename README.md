@@ -6,9 +6,10 @@ For the APWorld for KeyWe see [KeyWe APWorld](https://github.com/xMcacutt/Archip
 
 ## Setup
 
-#### Mod Manager
+#### Mod Manager - RECOMMENDED
 
-COMING SOON
+If you are reading this on Thunderstore, great! Simply download the [Thunderstore Mod Manager](https://thunderstore.io/), follow the instructions to set up KeyWe and install the [Archipelago client mod](https://thunderstore.io/c/keywe/p/xMcacutt/KeyWe_Archipelago/).
+This is the recommended installation method but manual installation is also possible and described below.
 
 #### Manual Installation
 
