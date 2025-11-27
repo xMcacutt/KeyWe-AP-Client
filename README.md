@@ -2,7 +2,7 @@
 
 This mod is a client side implementation for Archipelago.gg
 
-For the APWorld for KeyWe see [KeyWe APWorld](https://github.com/xMcacutt/Archipelago-KeyWe/releases/latest)
+For the APWorld for KeyWe see [KeyWe APWorld](https://github.com/xMcacutt-Archipelago/Archipelago-KeyWe/releases/latest)
 
 ## Setup
 
@@ -17,7 +17,7 @@ First, download the latest release from the releases page and extract.
 
 To Install MANUALLY, you'll need to install [BepinEx](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.4). Navigate to your KeyWe folder, which should be in steamapps/common/KeyWe, and copy the Bepin files into this folder. Then run KeyWe.exe. this will create the necessary subdirectories for Bepin to function and for mods to load.
 
-Next, close the game and navigate to the plugins folder in the BepInEx folder, and copy the Multiclient.Net dll and KeyWe_AP_Client dll from the latest release into it.
+Next, close the game and navigate to the plugins folder in the BepInEx folder, and copy the KeyWe_Archipelago from the latest release into it.
 
 Once you launch the game, the client should be running.
 

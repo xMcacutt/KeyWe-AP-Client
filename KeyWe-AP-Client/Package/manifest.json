@@ -1,7 +1,7 @@
 {
     "name": "KeyWe_Archipelago",
-    "version_number": "1.0.1",
-    "website_url": "https://github.com/xMcacutt/KeyWe-AP-Client",
+    "version_number": "1.0.3",
+    "website_url": "https://github.com/xMcacutt-Archipelago/KeyWe-AP-Client",
     "description": "Archipelago.gg implementation for KeyWe",
     "dependencies": [
     ]

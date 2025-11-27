@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -34,7 +35,7 @@ public class PluginMain : BaseUnityPlugin
         APConsole.Create();
         APConsole.Instance.Log("Press F7 to toggle the archipelago log.");
     }
-
+    
     private void Start()
     {
         Cursor.visible = true;

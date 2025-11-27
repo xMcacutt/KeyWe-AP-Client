@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,39 +28,43 @@ public class APConsole : MonoBehaviour
 
     private const float MessageSpacing = 6f;
 
+    public static TMP_FontAsset font;
+
     private static readonly Dictionary<string, string> KeywordColors = new()
     {
         { "summer", "#00ff00" },
         { "fall", "#ff6600" },
         { "winter", "#3399ff" },
-        { "warning", "#ff0000"},
-        { "movement+", "#ffff00"},
-        { "respawn+", "#ffff00"},
-        { "dash+", "#ffff00"},
-        { "jump+", "#ffff00"},
-        { "swim+", "#ffff00"},
-        { "chirp+", "#ffff00"},
-        { "peck+", "#ffff00"},
-        { "random facewear", "#ff00ff"},
-        { "random hat", "#ff00ff"},
-        { "random skin", "#ff00ff"},
-        { "random footwear", "#ff00ff"},
-        { "random backwear", "#ff00ff"},
-        { "random hairstyle", "#ff00ff"},
-        { "random arms", "#ff00ff"}
+        { "warning", "#ff0000" },
+        { "movement+", "#ffff00" },
+        { "respawn+", "#ffff00" },
+        { "dash+", "#ffff00" },
+        { "jump+", "#ffff00" },
+        { "swim+", "#ffff00" },
+        { "chirp+", "#ffff00" },
+        { "peck+", "#ffff00" },
+        { "random facewear", "#ff00ff" },
+        { "random hat", "#ff00ff" },
+        { "random skin", "#ff00ff" },
+        { "random footwear", "#ff00ff" },
+        { "random backwear", "#ff00ff" },
+        { "random hairstyle", "#ff00ff" },
+        { "random arms", "#ff00ff" }
     };
-
-    private static readonly Regex KeywordRegex = new(
-        string.Join("|", KeywordColors.Keys.Select(Regex.Escape)),
-        RegexOptions.IgnoreCase
-    );
 
     private readonly Queue<Image> _backgroundPool = new();
 
     private readonly Queue<LogEntry> _cachedEntries = new();
 
-    private readonly Queue<Text> _textPool = new();
-    private readonly List<LogEntry> _visibleEntries = new();
+    private readonly Queue<TextMeshProUGUI> _textPool = new();
+    private readonly List<LogEntry> _visibleEntries = [];
+    private readonly List<LogEntry> _historyEntries = [];
+    private GameObject _historyPanel;
+    private RectTransform _historyContent;
+    private bool _showHistory = false;
+    private ScrollRect _historyScrollRect;
+    private RectTransform _historyViewport;
+
 
     private Transform _messageParent;
 
@@ -71,17 +78,27 @@ public class APConsole : MonoBehaviour
         TryAddNewMessages();
         if (Input.GetKeyDown(KeyCode.F7))
             ToggleConsole();
+        if (Input.GetKeyDown(KeyCode.F8))
+            ToggleHistory();
+
+        if (_showHistory)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 
     public static void Create()
     {
         if (Instance != null)
             return;
-        File.WriteAllText(SaveSystem.DataRoot + "ArchieplagoDebugLog.txt", "");
+        Resources.FindObjectsOfTypeAll<TMP_FontAsset>().ForEachItem(x => Debug.Log(x.name));
+        font = Resources.FindObjectsOfTypeAll<TMP_FontAsset>().First(x => x.name == "BlackHanSans-Regular SDF");
         var consoleObject = new GameObject("ArchipelagoConsoleUI");
         DontDestroyOnLoad(consoleObject);
         Instance = consoleObject.AddComponent<APConsole>();
         Instance.BuildUI();
+        Instance.Log("Welcome to KeyWe");
     }
 
     private void UpdateMessages(float delta)
@@ -169,6 +186,9 @@ public class APConsole : MonoBehaviour
 
     private void TryAddNewMessages()
     {
+        if (_showHistory)
+            return;
+
         if (!_cachedEntries.Any())
             return;
 
@@ -188,6 +208,46 @@ public class APConsole : MonoBehaviour
         _visibleEntries.Add(entry);
         RecalculateBaseY();
         entry.animatedY = entry.baseY + entry.offsetY;
+    }
+
+    private void AddHistoryEntryVisual(LogEntry entry)
+    {
+        var bg = GetBackground();
+        bg.transform.SetParent(_historyContent, false);
+
+        var bgRect = bg.rectTransform;
+        bgRect.anchorMin = new Vector2(0, 1);
+        bgRect.anchorMax = new Vector2(1, 1);
+        bgRect.pivot = new Vector2(0.5f, 1);
+        bgRect.anchoredPosition = Vector2.zero;
+        bgRect.sizeDelta = new Vector2(600f, MessageHeight);
+
+        var text = GetText();
+        var tRect = text.rectTransform;
+        tRect.SetParent(bg.transform, false);
+
+        tRect.anchorMin = new Vector2(0, 0);
+        tRect.anchorMax = new Vector2(1, 1);
+        tRect.pivot = new Vector2(0, 0.5f);
+        tRect.offsetMin = new Vector2(8f, 4f);
+        tRect.offsetMax = new Vector2(-8f, -4f);
+
+        entry.text = text;
+        entry.background = bg;
+
+        text.color = Color.white;
+        bg.color = new Color(0, 0, 0, 0.8f);
+
+        text.text = Colorize(entry.message);
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(text.rectTransform);
+        var height = Mathf.Max(MessageHeight, text.preferredHeight + 8f);
+        var layoutElement = bg.GetComponent<LayoutElement>();
+        if (!layoutElement)
+            layoutElement = bg.gameObject.AddComponent<LayoutElement>();
+
+        layoutElement.preferredHeight = height;
     }
 
     private void CreateEntryVisual(LogEntry entry)
@@ -235,7 +295,7 @@ public class APConsole : MonoBehaviour
             new Vector2(0f, entry.animatedY);
     }
 
-    private Text GetText()
+    private TextMeshProUGUI GetText()
     {
         if (_textPool.Count > 0)
         {
@@ -244,15 +304,13 @@ public class APConsole : MonoBehaviour
             return t;
         }
 
-        var go = new GameObject("LogText", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
-        var t2 = go.GetComponent<Text>();
-        t2.fontSize = 18;
+        var go = new GameObject("LogText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        var t2 = go.GetComponent<TextMeshProUGUI>();
+        t2.fontSize = 19;
         t2.color = Color.white;
-        t2.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        t2.alignment = TextAnchor.MiddleLeft;
-        t2.horizontalOverflow = HorizontalWrapMode.Wrap;
-        t2.verticalOverflow = VerticalWrapMode.Overflow;
-
+        t2.font = font;
+        t2.wordSpacing = 20f;
+        t2.alignment = TextAlignmentOptions.MidlineLeft;
         return t2;
     }
 
@@ -284,13 +342,47 @@ public class APConsole : MonoBehaviour
 
     private string Colorize(string input)
     {
-        return KeywordRegex.Replace(input, match =>
+        if (string.IsNullOrEmpty(input) || KeywordColors.Count == 0)
+            return input;
+
+        var sb = new StringBuilder(input.Length + 32);
+        int i = 0;
+
+        while (i < input.Length)
         {
-            var key = match.Value.ToLower();
-            return KeywordColors.TryGetValue(key, out var hex)
-                ? $"<color={hex}>{match.Value}</color>"
-                : match.Value;
-        });
+            bool matched = false;
+
+            foreach (var kvp in KeywordColors)
+            {
+                var word = kvp.Key;
+                var color = kvp.Value;
+
+                if (string.IsNullOrEmpty(word))
+                    continue;
+
+                if (i + word.Length > input.Length)
+                    continue;
+
+                if (string.Compare(input, i, word, 0, word.Length, ignoreCase: true, CultureInfo.InvariantCulture) == 0)
+                {
+                    sb.Append("<color=").Append(color).Append('>');
+                    sb.Append(input, i, word.Length);
+                    sb.Append("</color>");
+
+                    i += word.Length;
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched)
+            {
+                sb.Append(input[i]);
+                i++;
+            }
+        }
+
+        return sb.ToString();
     }
 
     private const bool LogToFile = true;
@@ -298,23 +390,65 @@ public class APConsole : MonoBehaviour
     public void Log(string text)
     {
         var entry = new LogEntry(text);
-        if (LogToFile)
-            File.AppendAllLines(SaveSystem.DataRoot + "ArchipelagoDebugLog.txt", [text]);
+
         _cachedEntries.Enqueue(entry);
+
+        _historyEntries.Add(entry);
+
+        if (_historyPanel != null && _historyPanel.activeSelf)
+            AddHistoryEntryVisual(entry);
+    }
+
+    private void ToggleHistory()
+    {
+        _showHistory = !_showHistory;
+
+        _messageParent.gameObject.SetActive(!_showHistory);
+
+        _historyPanel.SetActive(_showHistory);
+
+        if (_showHistory)
+        {
+            foreach (var e in _visibleEntries)
+            {
+                if (e.text != null) e.text.gameObject.SetActive(false);
+                if (e.background != null) e.background.gameObject.SetActive(false);
+
+                _textPool.Enqueue(e.text);
+                _backgroundPool.Enqueue(e.background);
+            }
+
+            _visibleEntries.Clear();
+            _cachedEntries.Clear();
+
+            RebuildHistory();
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = false;
+            _messageParent.gameObject.SetActive(_showConsole);
+        }
     }
 
     private void ToggleConsole()
     {
         _showConsole = !_showConsole;
+
         foreach (var e in _visibleEntries)
         {
-            if (e?.background != null)
+            if (e.background != null)
                 e.background.gameObject.SetActive(_showConsole);
-            if (e?.text != null)
+            if (e.text != null)
                 e.text.gameObject.SetActive(_showConsole);
         }
 
         _messageParent.gameObject.SetActive(_showConsole);
+
+        if (_showConsole)
+            return;
+        _showHistory = false;
+        _historyPanel.SetActive(false);
     }
 
     private void BuildUI()
@@ -336,12 +470,91 @@ public class APConsole : MonoBehaviour
         rect.SetParent(canvasObject.transform, false);
         rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0f, 0f);
         rect.anchoredPosition = new Vector2(PaddingX, PaddingY);
-
         _messageParent = container.transform;
+
+        _historyPanel = new GameObject("HistoryPanel", typeof(RectTransform));
+        var historyRect = _historyPanel.GetComponent<RectTransform>();
+        historyRect.SetParent(canvasObject.transform, false);
+
+        historyRect.anchorMin = new Vector2(0f, 0f);
+        historyRect.anchorMax = new Vector2(0f, 0f);
+        historyRect.pivot = new Vector2(0f, 0f);
+        historyRect.anchoredPosition = new Vector2(PaddingX, PaddingY);
+        historyRect.sizeDelta = new Vector2(600f, ConsoleHeight);
+
+        _historyPanel.SetActive(false);
+
+        _historyScrollRect = _historyPanel.AddComponent<ScrollRect>();
+        _historyScrollRect.horizontal = false;
+        _historyScrollRect.vertical = true;
+        _historyScrollRect.scrollSensitivity = 10f;
+        _historyScrollRect.movementType = ScrollRect.MovementType.Clamped;
+
+        var viewport = new GameObject("Viewport",
+            typeof(RectTransform),
+            typeof(Image),
+            typeof(Mask));
+        _historyViewport = viewport.GetComponent<RectTransform>();
+        viewport.transform.SetParent(_historyPanel.transform, false);
+
+        _historyViewport.anchorMin = Vector2.zero;
+        _historyViewport.anchorMax = Vector2.one;
+        _historyViewport.offsetMin = Vector2.zero;
+        _historyViewport.offsetMax = Vector2.zero;
+
+        var vpImage = viewport.GetComponent<Image>();
+        vpImage.color = Color.white;
+        vpImage.type = Image.Type.Simple;
+        vpImage.raycastTarget = true;
+
+        var mask = viewport.GetComponent<Mask>();
+        mask.showMaskGraphic = false;
+
+        _historyScrollRect.viewport = _historyViewport;
+        var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup),
+            typeof(ContentSizeFitter));
+        var contentRect = content.GetComponent<RectTransform>();
+        contentRect.SetParent(viewport.transform, false);
+
+        contentRect.anchorMin = new Vector2(0, 1);
+        contentRect.anchorMax = new Vector2(1, 1);
+        contentRect.pivot = new Vector2(0.5f, 1);
+        contentRect.anchoredPosition = Vector2.zero;
+        contentRect.sizeDelta = new Vector2(0, 0);
+
+        var layout = content.GetComponent<VerticalLayoutGroup>();
+        layout.childForceExpandHeight = false;
+        layout.childForceExpandWidth = true;
+        layout.childControlHeight = true;
+        layout.childControlWidth = true;
+        layout.spacing = 8;
+        layout.childAlignment = TextAnchor.UpperLeft;
+
+        var fitter = content.GetComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+        _historyScrollRect.content = contentRect;
+        _historyContent = contentRect;
+    }
+
+    private void RebuildHistory()
+    {
+        if (_historyContent == null)
+            return;
+        for (var i = _historyContent.childCount - 1; i >= 0; i--)
+            Destroy(_historyContent.GetChild(i).gameObject);
+        foreach (var entry in _historyEntries)
+            AddHistoryEntryVisual(entry);
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_historyContent);
+        Canvas.ForceUpdateCanvases();
+        _historyScrollRect.verticalNormalizedPosition = 0f;
     }
 
     [Serializable]
-    public class LogEntry(string msg)
+    public class LogEntry
     {
         public enum State
         {
@@ -357,10 +570,15 @@ public class APConsole : MonoBehaviour
         public float baseY;
         public float animatedY;
 
-        public Text text;
+        public TextMeshProUGUI text;
         public Image background;
 
-        public string message = msg;
+        public string message;
         public float height = MessageHeight;
+
+        public LogEntry(string msg)
+        {
+            message = msg;
+        }
     }
 }

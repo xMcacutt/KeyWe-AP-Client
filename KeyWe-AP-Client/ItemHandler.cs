@@ -111,28 +111,28 @@ public class ItemHandler
                     dashIncrement = (Data.MaxDashForce - Data.InitialDashForce) / 5;
                     SaveDataHandler.ArchipelagoSaveData.DashForce =
                         Math.Min(currentDashForce + dashIncrement, Data.MaxDashForce);
-                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    GameHandler.onReceivedMovementUpgrade?.Invoke();
                     break;
                 case (int)KWItem.MoveUp:
                     var currentWalkSpeed = SaveDataHandler.ArchipelagoSaveData.WalkSpeed;
                     var walkIncrement = (Data.MaxWalkSpeed - Data.InitialWalkSpeed) / 5;
                     SaveDataHandler.ArchipelagoSaveData.WalkSpeed =
                         Math.Min(currentWalkSpeed + walkIncrement, Data.MaxWalkSpeed);
-                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    GameHandler.onReceivedMovementUpgrade?.Invoke();
                     break;
                 case (int)KWItem.SwimUp:
                     var currentSwimSpeed = SaveDataHandler.ArchipelagoSaveData.SwimSpeed;
                     var swimIncrement = (Data.MaxSwimSpeed - Data.InitialSwimSpeed) / 5;
                     SaveDataHandler.ArchipelagoSaveData.SwimSpeed =
                         Math.Min(currentSwimSpeed + swimIncrement, Data.MaxSwimSpeed);
-                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    GameHandler.onReceivedMovementUpgrade?.Invoke();
                     break;
                 case (int)KWItem.JumpUp:
                     var currentJumpHeight = SaveDataHandler.ArchipelagoSaveData.JumpHeight;
                     var jumpIncrement = (Data.MaxJumpHeight - Data.InitialJumpHeight) / 5;
                     SaveDataHandler.ArchipelagoSaveData.JumpHeight =
                         Math.Min(currentJumpHeight + jumpIncrement, Data.MaxJumpHeight);
-                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    GameHandler.onReceivedMovementUpgrade?.Invoke();
                     break;
                 case (int)KWItem.RespawnUp:
                     var currentRespawnFallSpeed = SaveDataHandler.ArchipelagoSaveData.RespawnFallSpeed;
@@ -144,21 +144,21 @@ public class ItemHandler
                         (Data.MaxRespawnFallMoveSpeed - Data.InitialRespawnFallMoveSpeed) / 5;
                     SaveDataHandler.ArchipelagoSaveData.RespawnFallMoveSpeed = Math.Min(
                         currentRespawnFallMoveSpeed + respawnFallMoveSpeedIncrement, Data.MaxRespawnFallMoveSpeed);
-                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    GameHandler.onReceivedMovementUpgrade?.Invoke();
                     break;
                 case (int)KWItem.ChirpUp:
                     var currentChirpCooldown = SaveDataHandler.ArchipelagoSaveData.ChirpCooldown;
                     var chirpIncrement = (Data.InitialChirpCooldown - Data.MinChirpCooldown) / 5;
                     SaveDataHandler.ArchipelagoSaveData.ChirpCooldown = Math.Max(currentChirpCooldown - chirpIncrement,
                         Data.MinChirpCooldown);
-                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    GameHandler.onReceivedMovementUpgrade?.Invoke();
                     break;
                 case (int)KWItem.PeckUp:
                     var currentPeckCooldown = SaveDataHandler.ArchipelagoSaveData.PeckCooldown;
                     var peckIncrement = (Data.InitialPeckCooldown - Data.MinPeckCooldown) / 5;
                     SaveDataHandler.ArchipelagoSaveData.PeckCooldown =
                         Math.Max(currentPeckCooldown - peckIncrement, Data.MinPeckCooldown);
-                    GameHandler.onReceivedMovementUpgrade.Invoke();
+                    GameHandler.onReceivedMovementUpgrade?.Invoke();
                     break;
                 case > 0x2FF and < 0x30F:
                     SaveDataHandler.ArchipelagoSaveData.Collectibles[(int)item.ItemId - 0x300] = true;
