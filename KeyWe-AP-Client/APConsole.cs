@@ -13,23 +13,7 @@ namespace KeyWe_AP_Client;
 
 public class APConsole : MonoBehaviour
 {
-    private const float MessageHeight = 28f;
-    private const float ConsoleHeight = 280f;
-
-    private const float SlideInTime = 0.25f;
-    private const float HoldTime = 3.0f;
-    private const float FadeOutTime = 0.5f;
-
-    private const float SlideInOffset = -50f;
-    private const float FadeUpOffset = 20f;
-
-    private const float PaddingX = 25f;
-    private const float PaddingY = 25f;
-
-    private const float MessageSpacing = 6f;
-
-    public static TMP_FontAsset font;
-
+    // GAME SPECIFIC STUFF
     private static readonly Dictionary<string, string> KeywordColors = new()
     {
         { "summer", "#00ff00" },
@@ -52,6 +36,32 @@ public class APConsole : MonoBehaviour
         { "random arms", "#ff00ff" }
     };
 
+    private static string _fontName = "BlackHanSans-Regular SDF"; // Run the game to print a list of fonts to console then select one
+    private static string _gameName = "KeyWe";
+    private static KeyCode _logToggleKey = KeyCode.F7; // Reassign in Create if configurable
+    private static KeyCode _historyToggleKey = KeyCode.F8; // Reassign in Create if configurable
+    private static CursorLockMode _defaultCursorMode = CursorLockMode.None;
+    private static bool _defaultCursorVisible = true;
+    
+    // CONSOLE PARAMS
+    private const float MessageHeight = 28f;
+    private const float ConsoleHeight = 280f;
+
+    private const float SlideInTime = 0.25f;
+    private const float HoldTime = 3.0f;
+    private const float FadeOutTime = 0.5f;
+
+    private const float SlideInOffset = -50f;
+    private const float FadeUpOffset = 20f;
+
+    private const float PaddingX = 25f;
+    private const float PaddingY = 25f;
+
+    private const float MessageSpacing = 6f;
+
+    // COLLECTIONS
+    private static TMP_FontAsset _font;
+
     private readonly Queue<Image> _backgroundPool = new();
 
     private readonly Queue<LogEntry> _cachedEntries = new();
@@ -71,14 +81,28 @@ public class APConsole : MonoBehaviour
     private bool _showConsole = true;
 
     public static APConsole Instance { get; private set; }
+    
+    public static void Create()
+    {
+        if (Instance != null)
+            return;
+        Resources.FindObjectsOfTypeAll<TMP_FontAsset>().ForEachItem(x => Debug.Log(x.name)); 
+        _font = Resources.FindObjectsOfTypeAll<TMP_FontAsset>().First(x => x.name == _fontName);
+        var consoleObject = new GameObject("ArchipelagoConsoleUI");
+        DontDestroyOnLoad(consoleObject);
+        Instance = consoleObject.AddComponent<APConsole>();
+        Instance.BuildUI();
+        Instance.Log($"Welcome to {_gameName} Archipelago!");
+        Instance.Log($"Press {_logToggleKey.ToString()} to Toggle the log and {_historyToggleKey.ToString()} to toggle log history");
+    }
 
     private void Update()
     {
         UpdateMessages(Time.deltaTime);
         TryAddNewMessages();
-        if (Input.GetKeyDown(KeyCode.F7))
+        if (Input.GetKeyDown(_logToggleKey))
             ToggleConsole();
-        if (Input.GetKeyDown(KeyCode.F8))
+        if (Input.GetKeyDown(_historyToggleKey))
             ToggleHistory();
 
         if (_showHistory)
@@ -86,19 +110,6 @@ public class APConsole : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-    }
-
-    public static void Create()
-    {
-        if (Instance != null)
-            return;
-        Resources.FindObjectsOfTypeAll<TMP_FontAsset>().ForEachItem(x => Debug.Log(x.name));
-        font = Resources.FindObjectsOfTypeAll<TMP_FontAsset>().First(x => x.name == "BlackHanSans-Regular SDF");
-        var consoleObject = new GameObject("ArchipelagoConsoleUI");
-        DontDestroyOnLoad(consoleObject);
-        Instance = consoleObject.AddComponent<APConsole>();
-        Instance.BuildUI();
-        Instance.Log("Welcome to KeyWe");
     }
 
     private void UpdateMessages(float delta)
@@ -303,12 +314,11 @@ public class APConsole : MonoBehaviour
             t.gameObject.SetActive(true);
             return t;
         }
-
         var go = new GameObject("LogText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         var t2 = go.GetComponent<TextMeshProUGUI>();
         t2.fontSize = 19;
         t2.color = Color.white;
-        t2.font = font;
+        t2.font = _font;
         t2.wordSpacing = 20f;
         t2.alignment = TextAlignmentOptions.MidlineLeft;
         return t2;
@@ -425,8 +435,8 @@ public class APConsole : MonoBehaviour
         }
         else
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = false;
+            Cursor.lockState = _defaultCursorMode;
+            Cursor.visible = _defaultCursorVisible;
             _messageParent.gameObject.SetActive(_showConsole);
         }
     }
