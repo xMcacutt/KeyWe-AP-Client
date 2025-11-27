@@ -33,7 +33,6 @@ public class PluginMain : BaseUnityPlugin
         ItemHandler = new ItemHandler();
         LocationHandler = new LocationHandler();
         APConsole.Create();
-        APConsole.Instance.Log("Press F7 to toggle the archipelago log.");
     }
     
     private void Start()

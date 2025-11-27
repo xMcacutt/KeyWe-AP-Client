@@ -93,7 +93,7 @@ public class APConsole : MonoBehaviour
         Instance = consoleObject.AddComponent<APConsole>();
         Instance.BuildUI();
         Instance.Log($"Welcome to {_gameName} Archipelago!");
-        Instance.Log($"Press {_logToggleKey.ToString()} to Toggle the log and {_historyToggleKey.ToString()} to toggle log history");
+        Instance.Log($"Press {_logToggleKey.ToString()} to Toggle log and {_historyToggleKey.ToString()} to toggle history");
     }
 
     private void Update()
